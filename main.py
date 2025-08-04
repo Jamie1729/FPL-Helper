@@ -1,7 +1,10 @@
 import requests
+import matplotlib.pyplot as plt
+fig, ax = plt.subplots()
+
 from pprint import pprint
 from enum import Enum
-
+import sklearn
 import pandas as pd
 pd.set_option('display.max_columns', None)
 
@@ -32,6 +35,7 @@ class POS(Enum):
     DEF = 2
     MID = 3
     ATK = 4
+
 def main():
     all_data = requests.get(fpl_base_url+'bootstrap-static/').json()
 
@@ -40,12 +44,16 @@ def main():
     positions = pd.json_normalize(all_data['element_types'])
 
     df = pd.merge(left=player_data, right=teams, left_on='team',right_on='id')
-    df = df.merge(positions,left_on='element_type',right_on='id')
+    df = df.merge(positions, left_on='element_type', right_on='id')
     df = df.rename(
         columns={'name': 'team_name', 'singular_name': 'position_name'}
     )
-
-    player_data = player_data[['id','first_name','second_name','web_name','team','element_type']]
+    player_data = player_data[]
+    #['id','first_name','second_name','web_name','team','element_type']
+    # for pid in player_data['id']:
+    #     player_season = get_season_history(pid)
+    #     if player_season.size == 0:
+    #         continue
 
 
 def get_gameweek_history(player_id):
@@ -64,6 +72,11 @@ def get_season_history(player_id):
 
     df = pd.json_normalize(r['history_past'])
     return df
+
+def plot_player_metric_history(player_id, metric):
+    plt.plot(get_season_history(player_id)['season_name'], get_season_history(player_id)[metric])
+    plt.title(player_id)
+    plt.show()
 
 if __name__ == '__main__':
     main()
