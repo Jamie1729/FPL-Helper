@@ -1,3 +1,5 @@
+import time
+
 import requests
 import matplotlib.pyplot as plt
 fig, ax = plt.subplots()
@@ -45,15 +47,19 @@ def main():
 
     df = pd.merge(left=player_data, right=teams, left_on='team',right_on='id')
     df = df.merge(positions, left_on='element_type', right_on='id')
-    df = df.rename(
-        columns={'name': 'team_name', 'singular_name': 'position_name'}
-    )
-    player_data = player_data[]
+    df = df.rename( columns={'name': 'team_name', 'singular_name': 'position_name'} )
     #['id','first_name','second_name','web_name','team','element_type']
-    # for pid in player_data['id']:
-    #     player_season = get_season_history(pid)
-    #     if player_season.size == 0:
-    #         continue
+
+    for pid in player_data.index:
+         player_season = get_season_history(pid+1)
+         if player_season.size == 0:
+             df.drop(pid, inplace=True)
+             continue
+         if sum(player_season['minutes']) <= 400:
+            df.drop(pid, inplace=True)
+            continue
+
+    pprint(df)
 
 
 def get_gameweek_history(player_id):
@@ -61,15 +67,12 @@ def get_gameweek_history(player_id):
         fpl_base_url + 'element-summary/' + str(player_id) + '/'
     ).json()
     df = pd.json_normalize(r['history'])
-
     return df
-
 
 def get_season_history(player_id):
     r = requests.get(
         fpl_base_url + 'element-summary/' + str(player_id) + '/'
     ).json()
-
     df = pd.json_normalize(r['history_past'])
     return df
 
