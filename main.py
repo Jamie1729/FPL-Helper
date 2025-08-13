@@ -1,16 +1,12 @@
-import time
-
-import requests
-import matplotlib.pyplot as plt
+import time, requests, pandas as pd,matplotlib.pyplot as plt
 fig, ax = plt.subplots()
+pd.set_option('display.max_columns', None)
 
 from pprint import pprint
 from enum import Enum
-import sklearn
-import pandas as pd
-pd.set_option('display.max_columns', None)
+from hmmlearn import hmm
+import os
 
-fpl_base_url = 'https://fantasy.premierleague.com/api/'
 class TEAM(Enum):
     ARS = 1
     AVL = 2
@@ -38,28 +34,42 @@ class POS(Enum):
     MID = 3
     ATK = 4
 
+fpl_base_url = 'https://fantasy.premierleague.com/api/'
+data_file_names = ["gks","defs","mids","atks"]
 def main():
-    all_data = requests.get(fpl_base_url+'bootstrap-static/').json()
+    if not all(map(playerFileExists, data_file_names)):
+        all_data = requests.get(fpl_base_url+'bootstrap-static/').json()
 
-    player_data = pd.json_normalize(all_data['elements'])
-    teams = pd.json_normalize(all_data['teams'])
-    positions = pd.json_normalize(all_data['element_types'])
+        player_data = pd.json_normalize(all_data['elements'])
+        teams = pd.json_normalize(all_data['teams'])
+        positions = pd.json_normalize(all_data['element_types'])
 
-    df = pd.merge(left=player_data, right=teams, left_on='team',right_on='id')
-    df = df.merge(positions, left_on='element_type', right_on='id')
-    df = df.rename( columns={'name': 'team_name', 'singular_name': 'position_name'} )
-    #['id','first_name','second_name','web_name','team','element_type']
+        df = pd.merge(left=player_data, right=teams, left_on='team',right_on='id')
+        df = df.merge(positions, left_on='element_type', right_on='id')
+        df = df.rename( columns={'name': 'team_name', 'singular_name': 'position_name'} )
+        #['id','first_name','second_name','web_name','team','element_type']
 
-    for pid in player_data.index:
-         player_season = get_season_history(pid+1)
-         if player_season.size == 0:
-             df.drop(pid, inplace=True)
-             continue
-         if sum(player_season['minutes']) <= 400:
-            df.drop(pid, inplace=True)
-            continue
+        for pid in player_data.index:
+             player_season = get_season_history(pid+1)
+             if player_season.size == 0:
+                 df.drop(pid, inplace=True)
+                 continue
+             if sum(player_season['minutes']) <= 400:
+                df.drop(pid, inplace=True)
+                continue
 
-    pprint(df)
+        GKs  = df[df['id']==1]
+        DEFs = df[df['id']==2]
+        MIDs = df[df['id']==3]
+        ATKs = df[df['id']==4]
+
+        GKs.to_json('./players/gks.json')
+        DEFs.to_json('./players/defs.json')
+        MIDs.to_json('./players/mids.json')
+        ATKs.to_json('./players/atks.json')
+    else:
+        print("Player data already stored locally.")
+
 
 
 def get_gameweek_history(player_id):
@@ -77,9 +87,15 @@ def get_season_history(player_id):
     return df
 
 def plot_player_metric_history(player_id, metric):
-    plt.plot(get_season_history(player_id)['season_name'], get_season_history(player_id)[metric])
-    plt.title(player_id)
-    plt.show()
+    try:
+        plt.plot(get_season_history(player_id)['season_name'], get_season_history(player_id)[metric])
+        plt.title(player_id)
+        plt.show()
+    except KeyError:
+        print("No data found for metric: "+metric)
+
+def playerFileExists(path):
+    return os.path.exists("./players/"+path+".json")
 
 if __name__ == '__main__':
     main()
