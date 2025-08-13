@@ -1,4 +1,5 @@
 import time, requests, pandas as pd,matplotlib.pyplot as plt
+from data_funcs import *
 fig, ax = plt.subplots()
 pd.set_option('display.max_columns', None)
 
@@ -34,7 +35,6 @@ class POS(Enum):
     MID = 3
     ATK = 4
 
-fpl_base_url = 'https://fantasy.premierleague.com/api/'
 data_file_names = ["gks","defs","mids","atks"]
 def main():
     if not all(map(playerFileExists, data_file_names)):
@@ -69,33 +69,6 @@ def main():
         ATKs.to_json('./players/atks.json')
     else:
         print("Player data already stored locally.")
-
-
-
-def get_gameweek_history(player_id):
-    r = requests.get(
-        fpl_base_url + 'element-summary/' + str(player_id) + '/'
-    ).json()
-    df = pd.json_normalize(r['history'])
-    return df
-
-def get_season_history(player_id):
-    r = requests.get(
-        fpl_base_url + 'element-summary/' + str(player_id) + '/'
-    ).json()
-    df = pd.json_normalize(r['history_past'])
-    return df
-
-def plot_player_metric_history(player_id, metric):
-    try:
-        plt.plot(get_season_history(player_id)['season_name'], get_season_history(player_id)[metric])
-        plt.title(player_id)
-        plt.show()
-    except KeyError:
-        print("No data found for metric: "+metric)
-
-def playerFileExists(path):
-    return os.path.exists("./players/"+path+".json")
 
 if __name__ == '__main__':
     main()
