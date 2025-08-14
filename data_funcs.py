@@ -1,9 +1,12 @@
-import time, requests, pandas as pd,matplotlib.pyplot as plt, os
-from importlib.metadata import distribution
+import matplotlib.pyplot as plt
+import os
+import pandas as pd
+import requests
+
 fpl_base_url = 'https://fantasy.premierleague.com/api/'
 
 def playerFileExists(path):
-    return os.path.exists("./players/"+path+".json")
+    return os.path.exists("./players/"+path+".csv")
 
 def get_gameweek_history(player_id):
     r = requests.get(
@@ -18,7 +21,6 @@ def get_season_history(player_id):
     ).json()
     df = pd.json_normalize(r['history_past'])
     return df
-
 
 def plot_player_metric_history(player_id, metric):
     try:

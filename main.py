@@ -1,12 +1,11 @@
-import time, requests, pandas as pd,matplotlib.pyplot as plt
+import pandas as pd
+
 from data_funcs import *
 fig, ax = plt.subplots()
 pd.set_option('display.max_columns', None)
 
-from pprint import pprint
 from enum import Enum
-from hmmlearn import hmm
-import os
+
 
 class TEAM(Enum):
     ARS = 1
@@ -58,17 +57,19 @@ def main():
                 df.drop(pid, inplace=True)
                 continue
 
-        GKs  = df[df['id']==1]
-        DEFs = df[df['id']==2]
-        MIDs = df[df['id']==3]
-        ATKs = df[df['id']==4]
-
-        GKs.to_json('./players/gks.json')
-        DEFs.to_json('./players/defs.json')
-        MIDs.to_json('./players/mids.json')
-        ATKs.to_json('./players/atks.json')
+        df[df['id']==1].to_csv('./players/gks.csv')
+        df[df['id']==2].to_csv('./players/defs.csv')
+        df[df['id']==3].to_csv('./players/mids.csv')
+        df[df['id']==4].to_csv('./players/atks.csv')
     else:
         print("Player data already stored locally.")
+        GKs = pd.read_csv('./players/gks.csv')
+        DEFs = pd.read_csv('./players/defs.csv')
+        MIDs = pd.read_csv('./players/mids.csv')
+        ATKs = pd.read_csv('./players/atks.csv')
+
+    
+
 
 if __name__ == '__main__':
     main()
