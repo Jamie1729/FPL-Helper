@@ -8,6 +8,9 @@ fpl_base_url = 'https://fantasy.premierleague.com/api/'
 def playerFileExists(path):
     return os.path.exists("./players/"+path+".csv")
 
+def gwFileExists(path):
+    return os.path.exists("./gws/"+path+".csv")
+
 def get_gameweek_history(player_id):
     r = requests.get(
         fpl_base_url + 'element-summary/' + str(player_id) + '/'

@@ -1,19 +1,36 @@
+import re
 import time, requests, pandas as pd,matplotlib.pyplot as plt
+
+import numpy as np
+
 from data_funcs import *
-from importlib.metadata import distribution
+from sklearn.preprocessing import StandardScaler
+import os
 
 fig, ax = plt.subplots()
 pd.set_option('display.max_columns', None)
 fpl_base_url = 'https://fantasy.premierleague.com/api/'
 
 def main():
-    for i in range(1,39):
-        url = f"https://raw.githubusercontent.com/vaastav/Fantasy-Premier-League/master/data/2024-25/gws/gw{i}.csv"
-        pd.read_csv(url).to_csv(f'./2425_gws/gw{i}.csv')
+    minutes = map(lambda filename : pd.read_csv("./2024-25/players/"+filename+"/gw.csv")['minutes'],
+                    os.listdir("./2024-25/players/"))
+    minutes = pd.DataFrame(list(filter(hasEnoughMins, minutes)))
+    print(minutes)
 
-def learn_points_distribution(df):
-    #NOT YET IMPLEMENTED
-    return None
+    #scaler = StandardScaler()
+    #minutes = scaler.fit_transform(minutes)
+
+
+    #plt.plot(player_gw_data['minutes'])
+    #plt.title(filename)
+    #plt.xlabel("Game Week")
+    #plt.ylabel("Minutes Played")
+    #plt.show()
+
+
+def hasEnoughMins(arr):
+    return sum(arr) >= 500
+
 
 
 if __name__ == '__main__':
