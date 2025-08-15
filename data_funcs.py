@@ -32,3 +32,4 @@ def plot_player_metric_history(player_id, metric):
         plt.show()
     except KeyError:
         print("No data found for metric: "+metric)
+
