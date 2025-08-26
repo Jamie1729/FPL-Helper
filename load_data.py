@@ -1,7 +1,9 @@
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import requests
-from data_funcs import *
+from hmmlearn import hmm
+from utilities import *
 fig, ax = plt.subplots()
 pd.set_option('display.max_columns', None)
 
@@ -68,6 +70,10 @@ def main():
         DEFs = pd.read_csv('./players/defs.csv')
         MIDs = pd.read_csv('./players/mids.csv')
         ATKs = pd.read_csv('./players/atks.csv')
+
+
+
+
 
     
 
