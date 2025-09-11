@@ -3,6 +3,8 @@ import numpy as np
 from hmmlearn import hmm
 from sklearn.preprocessing import StandardScaler
 from pprint import pprint
+from time import sleep
+
 
 from utilities import *
 
@@ -12,10 +14,10 @@ PERF_METRICS = ['assists', 'bonus', 'bps', 'clean_sheets', 'creativity', 'expect
                   'influence',
                   'minutes', 'own_goals', 'penalties_missed', 'penalties_saved', 'red_cards', 'saves', 'threat',
                   'yellow_cards']
-gk_points_vec =  [3,1,0,4,0,0,0,0,0,0.5,10,0,0,1/60,-2,-2,5,-3,1/3 ,0,-1]
-def_points_vec = [3,1,0,4,0,0,0,0,0,0.5, 6,0,0,1/60,-2,-2,0,-3,0   ,0,-1]
-mid_points_vec = [3,1,0,1,0,0,0,0,0,0  , 5,0,0,1/60,-2,-2,0,-3,0   ,0,-1]
-atk_points_vec = [3,1,0,0,0,0,0,0,0,0  , 4,0,0,1/60,-2,-2,0,-3,0   ,0,-1]
+gk_points_vec =  [3,0,0,4,0,0,0,0,0,0.5,10,0,0,1/60,-2,-2,5,-3,1/3 ,0,-1]
+def_points_vec = [3,0,0,4,0,0,0,0,0,0.5, 6,0,0,1/60,-2,-2,0,-3,0   ,0,-1]
+mid_points_vec = [3,0,0,1,0,0,0,0,0,0  , 5,0,0,1/60,-2,-2,0,-3,0   ,0,-1]
+atk_points_vec = [3,0,0,0,0,0,0,0,0,0  , 4,0,0,1/60,-2,-2,0,-3,0   ,0,-1]
 points_vecs = [gk_points_vec,def_points_vec,mid_points_vec,atk_points_vec]
 fig, ax = plt.subplots()
 pd.set_option('display.max_columns', None)
@@ -61,7 +63,7 @@ def main():
         for id_x in pos_file['id_x']:
             player_gw = get_gameweek_history(id_x)
             if player_gw.empty or len(player_gw)<3: continue
-            pos_points.append([id_x,np.dot(cut_stat_zero(scaler.inverse_transform(model.sample(1,None,model.predict(player_gw[PERF_METRICS],3)[-1])[0])[0]),points_vecs[pos])])
+            pos_points.append([id_x, np.dot(clean_data(scaler.inverse_transform(model.sample(1, None, model.predict(player_gw[PERF_METRICS], 3)[-1])[0])[0]),points_vecs[pos])])
         all_pos_points.append(pos_points)
         pprint(pos_points)
 
@@ -70,7 +72,7 @@ def main():
 
 
 
-def cut_stat_zero(arr):
+def clean_data(arr):
     return list(map(lambda stat: max(stat,0),arr))
 
 
