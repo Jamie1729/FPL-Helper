@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 import matplotlib.pyplot as plt
 import requests
 from hmmlearn import hmm
@@ -39,43 +40,21 @@ class POS(Enum):
 
 data_file_names = ["gks","defs","mids","atks"]
 def main():
-    if not all(map(playerFileExists, data_file_names)):
-        all_data = requests.get(fpl_base_url+'bootstrap-static/').json()
+    all_data = requests.get(fpl_base_url+'bootstrap-static/').json()
 
-        player_data = pd.json_normalize(all_data['elements'])
-        teams = pd.json_normalize(all_data['teams'])
-        positions = pd.json_normalize(all_data['element_types'])
+    player_data = pd.json_normalize(all_data['elements'])
+    teams = pd.json_normalize(all_data['teams'])
+    positions = pd.json_normalize(all_data['element_types'])
 
-        df = pd.merge(left=player_data, right=teams, left_on='team',right_on='id')
-        df = df.merge(positions, left_on='element_type', right_on='id')
-        df = df.rename( columns={'name': 'team_name', 'singular_name': 'position_name'} )
-        #['id','first_name','second_name','web_name','team','element_type']
+    df = pd.merge(left=player_data, right=teams, left_on='team',right_on='id')
+    df = df.merge(positions, left_on='element_type', right_on='id')
+    df = df.rename( columns={'name': 'team_name', 'singular_name': 'position_name'} )
+    #['id','first_name','second_name','web_name','team','element_type']
 
-        for pid in player_data.index:
-             player_season = get_season_history(pid+1)
-             if player_season.size == 0:
-                 df.drop(pid, inplace=True)
-                 continue
-             if sum(player_season['minutes']) <= 400:
-                df.drop(pid, inplace=True)
-                continue
-
-        df[df['id']==1].to_csv('./players/gks.csv')
-        df[df['id']==2].to_csv('./players/defs.csv')
-        df[df['id']==3].to_csv('./players/mids.csv')
-        df[df['id']==4].to_csv('./players/atks.csv')
-    else:
-        print("Player data already stored locally.")
-        GKs = pd.read_csv('./players/gks.csv')
-        DEFs = pd.read_csv('./players/defs.csv')
-        MIDs = pd.read_csv('./players/mids.csv')
-        ATKs = pd.read_csv('./players/atks.csv')
-
-
-
-
-
-    
+    df[df['id']==1].to_csv('./2526-players/gks.csv')
+    df[df['id']==2].to_csv('./2526-players/defs.csv')
+    df[df['id']==3].to_csv('./2526-players/mids.csv')
+    df[df['id']==4].to_csv('./2526-players/atks.csv')
 
 
 if __name__ == '__main__':
